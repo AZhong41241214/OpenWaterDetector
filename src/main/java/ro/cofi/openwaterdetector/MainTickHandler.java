@@ -26,7 +26,6 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
     }
 
     private void tick(MinecraftClient client) {
-        // 處理開關按鍵
         boolean currentlyPressed = OpenWaterDetectorClient.toggleKey.isPressed();
         if (currentlyPressed && !lastPressed) {
             enabled = !enabled;
@@ -34,10 +33,8 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         lastPressed = currentlyPressed;
 
         if (!enabled) return;
-        if (client == null) return;
-        if (client.player == null) return;
+        if (client == null || client.player == null || client.world == null) return;
 
-        // 找玩家的魚鉤
         Optional<FishingBobberEntity> optionalBobber = client.world
                 .getEntitiesByClass(
                         FishingBobberEntity.class,
@@ -53,30 +50,19 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         FishingBobberAccessor accessor = (FishingBobberAccessor) bobber;
         FishingBobberEntity.State state = accessor.getState();
 
-        // 只在魚鉤浮在水面上時才顯示
         if (state != FishingBobberEntity.State.BOBBING) return;
 
         Vec3d bobberPos = bobber.getPos();
         boolean inOpenWater = bobber.isOpenOrWaterAround(bobber.getBlockPos());
 
-        // 生成粒子效果
-        // 開放水域 → 綠色粒子；非開放水域 → 火焰粒子
         double randomX = bobberPos.x + (random.nextDouble() - 0.5) * 0.5;
         double randomZ = bobberPos.z + (random.nextDouble() - 0.5) * 0.5;
         double y = bobberPos.y + 0.2;
 
         if (inOpenWater) {
-            client.world.addParticle(
-                    ParticleTypes.COMPOSTER,
-                    randomX, y, randomZ,
-                    0, 0.05, 0
-            );
+            client.world.addParticle(ParticleTypes.COMPOSTER, randomX, y, randomZ, 0, 0.05, 0);
         } else {
-            client.world.addParticle(
-                    ParticleTypes.SMALL_FLAME,
-                    randomX, y, randomZ,
-                    0, 0.05, 0
-            );
+            client.world.addParticle(ParticleTypes.SMALL_FLAME, randomX, y, randomZ, 0, 0.05, 0);
         }
     }
 }
