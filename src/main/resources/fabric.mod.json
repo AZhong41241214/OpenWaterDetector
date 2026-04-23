@@ -4,10 +4,7 @@
   "version": "${version}",
   "name": "OpenWaterDetector",
   "description": "A Fabric mod to inform the user whether they are fishing in open water.",
-  "authors": [
-    "Deathcofi",
-    "Ported to 1.21.8"
-  ],
+  "authors": ["Deathcofi"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
