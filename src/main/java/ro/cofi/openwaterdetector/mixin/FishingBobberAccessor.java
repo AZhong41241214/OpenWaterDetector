@@ -2,11 +2,15 @@ package ro.cofi.openwaterdetector.mixin;
 
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(FishingBobberEntity.class)
-public interface FishingBobberAccessor {
+public abstract class FishingBobberAccessor {
 
-    @Accessor("state")
-    FishingBobberEntity.State getState();
+    @Shadow
+    private FishingBobberEntity.State state;
+
+    public FishingBobberEntity.State getState() {
+        return this.state;
+    }
 }
