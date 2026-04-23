@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ro.cofi.openwaterdetector.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "FishingBobberAccessor"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
