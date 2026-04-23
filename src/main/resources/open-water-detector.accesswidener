@@ -1,4 +1,4 @@
 accessWidener v2 named
 
-# Allow access to FishingBobberEntity$State (inner enum)
 accessible class net/minecraft/entity/projectile/FishingBobberEntity$State
+accessible field net/minecraft/entity/projectile/FishingBobberEntity state Lnet/minecraft/entity/projectile/FishingBobberEntity$State;
