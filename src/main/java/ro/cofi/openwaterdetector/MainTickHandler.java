@@ -103,9 +103,9 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
 
         // 1.21.x addParticle(ParticleEffect, double, double, double, double, double, double)
         if (inOpenWater) {
-            world.addParticle(ParticleTypes.COMPOSTER, rx, y, rz, 0.0, 0.05, 0.0);
+            world.addParticle(rx, y, rz, 0.0, 0.05, ParticleTypes.COMPOSTER);
         } else {
-            world.addParticle(ParticleTypes.SMALL_FLAME, rx, y, rz, 0.0, 0.05, 0.0);
+            world.addParticle(rx, y, rz, 0.0, 0.05, ParticleTypes.SMALL_FLAME);
         }
     }
 }
