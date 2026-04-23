@@ -2,6 +2,7 @@ package ro.cofi.openwaterdetector;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
@@ -17,7 +18,6 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
     private boolean lastPressed = false;
     private final Random random = new Random();
 
-    // 用反射找 state 欄位，只找一次
     private Field stateField = null;
     private Object bobbingState = null;
     private boolean reflectionReady = false;
@@ -25,46 +25,22 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
     private void initReflection(FishingBobberEntity bobber) {
         if (reflectionReady) return;
         try {
-            // 找名為 "state" 的欄位（yarn 映射名）
-            for (Field f : bobber.getClass().getDeclaredFields()) {
-                f.setAccessible(true);
-                Object val = f.get(bobber);
-                if (val != null && val.getClass().isEnum()
-                        && val.getClass().getSimpleName().equals("State")) {
-                    stateField = f;
-                    // 找 BOBBING 這個 enum 常數
-                    for (Object constant : val.getClass().getEnumConstants()) {
-                        if (constant.toString().equals("BOBBING")) {
-                            bobbingState = constant;
-                            break;
-                        }
-                    }
-                    break;
-                }
-            }
-            // 若找不到 State 欄位，從父類找
-            if (stateField == null) {
-                Class<?> cls = bobber.getClass().getSuperclass();
-                while (cls != null && stateField == null) {
-                    for (Field f : cls.getDeclaredFields()) {
+            Class<?> cls = bobber.getClass();
+            while (cls != null && stateField == null) {
+                for (Field f : cls.getDeclaredFields()) {
+                    if (f.getType().isEnum() && f.getType().getSimpleName().equals("State")) {
                         f.setAccessible(true);
-                        try {
-                            Object val = f.get(bobber);
-                            if (val != null && val.getClass().isEnum()
-                                    && val.getClass().getSimpleName().equals("State")) {
-                                stateField = f;
-                                for (Object constant : val.getClass().getEnumConstants()) {
-                                    if (constant.toString().equals("BOBBING")) {
-                                        bobbingState = constant;
-                                        break;
-                                    }
-                                }
+                        stateField = f;
+                        for (Object constant : f.getType().getEnumConstants()) {
+                            if (constant.toString().equals("BOBBING")) {
+                                bobbingState = constant;
                                 break;
                             }
-                        } catch (Exception ignored) {}
+                        }
+                        break;
                     }
-                    cls = cls.getSuperclass();
                 }
+                cls = cls.getSuperclass();
             }
             reflectionReady = true;
         } catch (Exception e) {
@@ -74,10 +50,9 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
 
     private boolean isBobbing(FishingBobberEntity bobber) {
         initReflection(bobber);
-        if (stateField == null || bobbingState == null) return true; // 找不到就假設 bobbing
+        if (stateField == null || bobbingState == null) return true;
         try {
-            Object state = stateField.get(bobber);
-            return bobbingState.equals(state);
+            return bobbingState.equals(stateField.get(bobber));
         } catch (Exception e) {
             return true;
         }
@@ -102,7 +77,9 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         if (!enabled) return;
         if (client == null || client.player == null || client.world == null) return;
 
-        Optional<FishingBobberEntity> optionalBobber = client.world
+        ClientWorld world = client.world;
+
+        Optional<FishingBobberEntity> optionalBobber = world
                 .getEntitiesByClass(
                         FishingBobberEntity.class,
                         client.player.getBoundingBox().expand(64),
@@ -114,21 +91,21 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         if (optionalBobber.isEmpty()) return;
 
         FishingBobberEntity bobber = optionalBobber.get();
-
         if (!isBobbing(bobber)) return;
 
         FishingBobberAccessor accessor = (FishingBobberAccessor) bobber;
         boolean inOpenWater = accessor.invokeIsOpenOrWaterAround(bobber.getBlockPos());
 
-        Vec3d bobberPos = bobber.getPos();
-        double randomX = bobberPos.x + (random.nextDouble() - 0.5) * 0.5;
-        double randomZ = bobberPos.z + (random.nextDouble() - 0.5) * 0.5;
-        double y = bobberPos.y + 0.2;
+        Vec3d pos = bobber.getPos();
+        double rx = pos.x + (random.nextDouble() - 0.5) * 0.5;
+        double rz = pos.z + (random.nextDouble() - 0.5) * 0.5;
+        double y  = pos.y + 0.2;
 
+        // 1.21.x addParticle(ParticleEffect, double, double, double, double, double, double)
         if (inOpenWater) {
-            client.world.addParticle(ParticleTypes.COMPOSTER, randomX, y, randomZ, 0, 0.05, 0);
+            world.addParticle(ParticleTypes.COMPOSTER, rx, y, rz, 0.0, 0.05, 0.0);
         } else {
-            client.world.addParticle(ParticleTypes.SMALL_FLAME, randomX, y, randomZ, 0, 0.05, 0);
+            world.addParticle(ParticleTypes.SMALL_FLAME, rx, y, rz, 0.0, 0.05, 0.0);
         }
     }
 }
