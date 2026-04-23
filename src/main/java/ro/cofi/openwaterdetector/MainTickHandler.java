@@ -47,7 +47,7 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         if (optionalBobber.isEmpty()) return;
 
         FishingBobberEntity bobber = optionalBobber.get();
-        FishingBobberAccessor accessor = (FishingBobberAccessor) bobber;
+        FishingBobberAccessor accessor = (FishingBobberAccessor)(Object) bobber;
         FishingBobberEntity.State state = accessor.getState();
 
         if (state != FishingBobberEntity.State.BOBBING) return;
