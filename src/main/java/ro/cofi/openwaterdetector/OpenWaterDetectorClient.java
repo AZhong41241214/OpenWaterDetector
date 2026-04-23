@@ -21,7 +21,6 @@ public class OpenWaterDetectorClient implements ClientModInitializer {
     public void onInitializeClient() {
         LOGGER.info("Initializing {}", MOD_NAME);
 
-        // 註冊開關按鍵（預設 O）
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "key.open-water-detector.toggle",
                 InputUtil.Type.KEYSYM,
@@ -29,7 +28,6 @@ public class OpenWaterDetectorClient implements ClientModInitializer {
                 "category.open-water-detector"
         ));
 
-        // 註冊每 tick 執行的事件
         ClientTickEvents.END_CLIENT_TICK.register(new MainTickHandler());
 
         LOGGER.info("{} successfully loaded", MOD_NAME);
