@@ -4,10 +4,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import ro.cofi.openwaterdetector.mixin.FishingBobberAccessor;
 
 import java.lang.reflect.Field;
@@ -103,12 +101,10 @@ public class MainTickHandler implements ClientTickEvents.EndTick {
         double rz = pos.z + (random.nextDouble() - 0.5) * 0.5;
         double y  = pos.y + 0.2;
 
-        // World.addParticle(ParticleEffect, x, y, z, vx, vy, vz) - public method
-        World w = world;
         if (inOpenWater) {
-            w.addParticle((ParticleEffect) ParticleTypes.COMPOSTER, rx, y, rz, 0.0, 0.05, 0.0);
+            client.particleManager.addParticle(ParticleTypes.COMPOSTER, rx, y, rz, 0.0, 0.05, 0.0);
         } else {
-            w.addParticle((ParticleEffect) ParticleTypes.SMALL_FLAME, rx, y, rz, 0.0, 0.05, 0.0);
+            client.particleManager.addParticle(ParticleTypes.SMALL_FLAME, rx, y, rz, 0.0, 0.05, 0.0);
         }
     }
 }
